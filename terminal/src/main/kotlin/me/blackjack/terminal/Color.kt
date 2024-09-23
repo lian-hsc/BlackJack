@@ -1,6 +1,6 @@
-package me.blackjack.terminal.api
+package me.blackjack.terminal
 
-import me.blackjack.terminal.Ansi
+import me.blackjack.terminal.impl.Ansi
 
 fun String.rgb(r: Int, g: Int, b: Int) =
     "${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.foreground(r, g, b)}$this${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.RESET_FOREGROUND}"

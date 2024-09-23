@@ -1,4 +1,4 @@
-package me.blackjack.terminal
+package me.blackjack.terminal.impl
 
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
