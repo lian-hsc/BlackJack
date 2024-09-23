@@ -1,19 +1,24 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ksp)
 }
 
-group = "me.cheesetastisch"
-version = "1.0-SNAPSHOT"
+allprojects {
+    group = "me.cheesetaschisch.blackjack"
+    version = "0.0.1"
 
-repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "com.google.devtools.ksp")
 
-    repositories {
-        mavenCentral()
+    dependencies {
+        compileOnly(rootProject.libs.bundles.koin)
+        ksp(rootProject.libs.koin.ksp)
     }
 
     kotlin {
