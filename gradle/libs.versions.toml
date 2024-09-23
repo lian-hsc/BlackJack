@@ -6,6 +6,8 @@ ksp = "2.0.20-1.0.25"
 koin = "4.0.0-RC2"
 koin-annotations = "1.4.0-RC4"
 
+jansi = "2.4.1"
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
@@ -15,6 +17,8 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-annotations = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koin-annotations" }
 koin-ksp = { group = "io.insert-koin", name = "koin-ksp-compiler-jvm", version.ref = "koin-annotations" }
+
+jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
 
 [bundles]
 koin = [
