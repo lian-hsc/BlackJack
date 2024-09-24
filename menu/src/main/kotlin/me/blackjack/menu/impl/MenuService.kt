@@ -20,23 +20,16 @@ internal class MenuService(private val terminalService: TerminalService) : IMenu
     private val currentMenu
         get() = _stack.lastOrNull()
 
-    private val ansiEscapeRegex = Regex("\u001B\\[[;\\d]*m")
-
     init {
-        thread {
-            var input: String
-            while (readlnOrNull().also { input = it ?: "" } != null) {
-                val reaction = currentMenu?.handleInput(input) ?: continue
+        terminalService.onKeyPress {
+            val reaction = currentMenu?.handleInput(it) ?: return@onKeyPress
 
-                when (reaction) {
-                    is Message -> redraw(reaction.message)
-                    is Pop -> pop(reaction.times)
-                    is Push -> push(reaction.menu, reaction.pushType)
-                    Redraw -> redraw(null)
-                }
+            when (reaction) {
+                is Message -> redraw(reaction.message)
+                is Pop -> pop(reaction.times)
+                is Push -> push(reaction.menu, reaction.pushType)
+                Redraw -> redraw(null)
             }
-
-            terminalService.clearScreen()
         }
     }
 
@@ -67,43 +60,21 @@ internal class MenuService(private val terminalService: TerminalService) : IMenu
         val state = currentMenu?.getState() ?: emptyList()
         val inputs = currentMenu?.getInputs() ?: emptyMap()
 
-        val requiredLines = state.size +
-                (if (inputs.isEmpty()) 0 else (inputs.size + 1)) +
-                (if (message == null) 0 else 2) +
-                1 // use for the prompt
+        val lines = mutableListOf<String>()
 
-        if (requiredLines > terminalService.height - 1) {
-            throw IllegalStateException("Menu is too large to be displayed on the terminal")
-        }
-
-        val top = (terminalService.height - requiredLines) / 2
-        val bottom = terminalService.height - requiredLines - top
-
-        repeat(top) { println(finalize("")) }
-
-        state.forEach { println(finalize(it)) }
+        lines.addAll(state)
 
         if (inputs.isNotEmpty()) {
-            println(finalize(""))
-            inputs.forEach { (key, value) -> println(finalize("${key.rgb(255, 170, 0)}: $value")) }
+            lines.add("")
+            inputs.forEach { (key, value) -> lines.add("${key.rgb(255, 170, 0)}: $value") }
         }
 
         if (message != null) {
-            println(finalize(""))
-            println(finalize(message))
+            lines.add("")
+            lines.add(message)
         }
 
-        repeat(bottom) { println(finalize("")) }
-    }
-
-    private fun finalize(text: String): String {
-        val actualText = text.bgRgb(51, 51, 51)
-        val actualLength = ansiEscapeRegex.replace(actualText, "").length
-
-        val leftPadding = (terminalService.width - actualLength) / 2 + if (actualLength % 2 == 0) 0 else 1
-        val rightPadding = terminalService.width - actualLength - leftPadding
-
-        return " ".repeat(leftPadding) + actualText + " ".repeat(rightPadding)
+        terminalService.draw(lines)
     }
 
 }

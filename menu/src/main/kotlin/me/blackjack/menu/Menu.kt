@@ -1,5 +1,7 @@
 package me.blackjack.menu
 
+import me.blackjack.terminal.Key
+
 interface Menu {
 
     fun onPush() = Unit
@@ -17,6 +19,6 @@ interface Menu {
 
     fun getInputs(): Map<String, String>
 
-    fun handleInput(input: String): InputReaction
+    fun handleInput(input: Key): InputReaction?
 
 }

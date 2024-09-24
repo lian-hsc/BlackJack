@@ -2,9 +2,10 @@ package me.blackjack.terminal
 
 interface TerminalService {
 
-    val width: Int
-    val height: Int
+    fun onKeyPress(callback: (Key) -> Unit)
 
-    fun clearScreen()
+    fun draw(lines: List<String>)
+
+    fun shutdown()
 
 }

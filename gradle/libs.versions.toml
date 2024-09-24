@@ -6,6 +6,7 @@ ksp = "2.0.20-1.0.25"
 koin = "4.0.0-RC2"
 koin-annotations = "1.4.0-RC4"
 
+jline = "3.27.0"
 jansi = "2.4.1"
 
 [plugins]
@@ -18,10 +19,23 @@ koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"
 koin-annotations = { group = "io.insert-koin", name = "koin-annotations", version.ref = "koin-annotations" }
 koin-ksp = { group = "io.insert-koin", name = "koin-ksp-compiler-jvm", version.ref = "koin-annotations" }
 
+jline = { group = "org.jline", name = "jline", version.ref = "jline" }
+jline-terminal = { group = "org.jline", name = "jline-terminal", version.ref = "jline" }
+jline-terminal-jansi = { group = "org.jline", name = "jline-terminal-jansi", version.ref = "jline" }
+jline-reader = { group = "org.jline", name = "jline-reader", version.ref = "jline" }
+
 jansi = { group = "org.fusesource.jansi", name = "jansi", version.ref = "jansi" }
 
 [bundles]
 koin = [
     "koin-core",
     "koin-annotations",
+]
+
+terminal = [
+    "jline",
+    "jline-terminal",
+    "jline-terminal-jansi",
+    "jline-reader",
+    "jansi",
 ]

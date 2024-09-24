@@ -1,3 +1,3 @@
 dependencies {
-    implementation(libs.jansi)
+    implementation(libs.bundles.terminal)
 }
