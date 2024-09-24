@@ -11,7 +11,7 @@ import kotlin.concurrent.thread
 import me.blackjack.menu.MenuService as IMenuService
 
 @Single(createdAtStart = true)
-class MenuService(private val terminalService: TerminalService) : IMenuService {
+internal class MenuService(private val terminalService: TerminalService) : IMenuService {
 
     private val _stack: MutableList<Menu> = mutableListOf()
 
