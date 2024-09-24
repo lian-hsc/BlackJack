@@ -4,7 +4,7 @@ import org.fusesource.jansi.AnsiConsole
 import org.koin.core.annotation.Single
 import me.blackjack.terminal.TerminalService as ITerminalService
 
-@Single(createdAtStart = true)
+@Single
 internal class TerminalService : ITerminalService {
 
     init {
