@@ -19,7 +19,7 @@ internal class PrintService(private val jline: JLineService) {
     }
 
     fun draw(lines: List<String>) {
-        if (lines.size > jline.terminal.height) {
+        if (lines.size * 2 > jline.terminal.height) {
             throw IllegalStateException("Menu is too large to be displayed on the terminal")
         }
 
@@ -83,11 +83,12 @@ internal class PrintService(private val jline: JLineService) {
     }
 
     private fun buildScreen(lines: List<String>): Map<Int, String> {
-        val top = (jline.terminal.height - lines.size) / 2
+        val top = (jline.terminal.height - lines.size * 2) / 2
         return lines
-            .mapIndexed { index, s -> top + index to s }
+            .mapIndexed { index, s -> top + index * 2 to s }
             .filter { (_, text) -> text.isNotBlank() }
             .toMap()
+
     }
 
     private fun finalize(text: String): String {

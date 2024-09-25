@@ -1,6 +1,7 @@
 package me.blackjack.rule.impl.menu
 
 import me.blackjack.menu.InputReaction
+import me.blackjack.menu.Pop
 import me.blackjack.menu.Redraw
 import me.blackjack.rule.Rule
 import me.blackjack.rule.impl.RuleService
@@ -80,6 +81,8 @@ internal class RuleMenu(
                 selectedRule = currentSubmenu!!.rules.first()
                 Redraw
             }
+
+            is EscapeKey -> Pop()
 
             else -> null
         }
