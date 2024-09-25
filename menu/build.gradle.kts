@@ -1,3 +1,3 @@
 dependencies {
-    compileOnly(project(":terminal"))
+    api(project(":terminal"))
 }

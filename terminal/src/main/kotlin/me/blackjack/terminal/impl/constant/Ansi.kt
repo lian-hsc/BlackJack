@@ -1,4 +1,4 @@
-package me.blackjack.terminal.impl
+package me.blackjack.terminal.impl.constant
 
 internal object Ansi {
 

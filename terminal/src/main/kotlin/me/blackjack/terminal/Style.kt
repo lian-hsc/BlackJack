@@ -1,6 +1,6 @@
 package me.blackjack.terminal
 
-import me.blackjack.terminal.impl.Ansi
+import me.blackjack.terminal.impl.constant.Ansi
 
 fun String.bold() = "${Ansi.ESCAPE_SEQUENCE}${Ansi.Style.BOLD}$this${Ansi.ESCAPE_SEQUENCE}${Ansi.Style.NO_BOLD}"
 fun String.italic() = "${Ansi.ESCAPE_SEQUENCE}${Ansi.Style.ITALIC}$this${Ansi.ESCAPE_SEQUENCE}${Ansi.Style.NO_ITALIC}"
