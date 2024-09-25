@@ -49,7 +49,7 @@ internal class RuleMenu(private val ruleService: RuleService) : IRuleMenu {
                                     ?.ordinal
                                     ?.let { if (input.direction == ArrowKey.Direction.UP) it - 1 else it + 1 }
                                     ?: 0)
-                                % Submenu.entries.size]
+                            .mod(Submenu.entries.size)]
                         Redraw
                     }
 
@@ -70,27 +70,28 @@ internal class RuleMenu(private val ruleService: RuleService) : IRuleMenu {
     } else {
         when (input) {
             is ArrowKey -> {
-                when(input.direction) {
+                when (input.direction) {
                     ArrowKey.Direction.UP, ArrowKey.Direction.DOWN -> {
                         selectedRule = currentSubmenu!!.rules[(
                                 currentSubmenu!!
                                     .rules
                                     .indexOf(selectedRule) +
                                         if (input.direction == ArrowKey.Direction.UP) -1 else 1)
-                                % currentSubmenu!!.rules.size]
+                            .mod(currentSubmenu!!.rules.size)]
                         Redraw
                     }
 
                     ArrowKey.Direction.LEFT, ArrowKey.Direction.RIGHT -> {
                         val allowedValues = AllowedValues.getAllowedValues(selectedRule!!)
 
-                        ruleService.setAnyValue(selectedRule!!,
+                        ruleService.setAnyValue(
+                            selectedRule!!,
                             allowedValues.keys.toList()[(
                                     allowedValues
                                         .keys
                                         .indexOf(ruleService.getValue(selectedRule!!)) +
                                             if (input.direction == ArrowKey.Direction.LEFT) -1 else 1)
-                                    % allowedValues.keys.size]
+                                .mod(allowedValues.keys.size)]
                         )
                         Redraw
                     }
