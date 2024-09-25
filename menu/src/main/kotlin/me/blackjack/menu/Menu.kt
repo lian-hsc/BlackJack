@@ -17,8 +17,6 @@ interface Menu {
      */
     fun getState(): List<String>
 
-    fun getInputs(): Map<String, String>
-
     fun handleInput(input: Key): InputReaction?
 
 }

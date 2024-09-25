@@ -18,6 +18,8 @@ internal class TerminalService : ITerminalService {
     private val reader: Reader
     private val buffer = mutableListOf<Int>()
 
+    private var currentScreen = mapOf<Int, String>()
+
     private val ansiEscapeRegex = Regex("\u001B\\[[;\\d]*m")
 
     init {
@@ -49,6 +51,15 @@ internal class TerminalService : ITerminalService {
                 handleInput()
             }
         }
+
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.INVISIBLE)
+        repeat(terminal.height) {
+            print(
+                Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.toLine(it + 1) +
+                        Ansi.ESCAPE_SEQUENCE + Ansi.Erase.LINE +
+                        finalize("")
+            )
+        }
     }
 
     override fun onKeyPress(callback: (Key) -> Unit) {
@@ -60,27 +71,22 @@ internal class TerminalService : ITerminalService {
             throw IllegalStateException("Menu is too large to be displayed on the terminal")
         }
 
-        val top = (terminal.height - lines.size) / 2
-        val bottom = terminal.height - lines.size - top
-
-        repeat(top) { println(finalize("")) }
-        lines.forEach { println(finalize(it)) }
-        repeat(bottom) { println(finalize("")) }
+        val difference = calculateDifference(lines)
+        redraw(difference)
     }
 
     override fun shutdown() {
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Erase.SCREEN)
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.toLine(1))
+
+        println(finalize(""))
+        println(finalize("Thank you for playing!"))
+        println(finalize(""))
+
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.VISIBLE)
+
         reader.close()
         terminal.close()
-    }
-
-    private fun finalize(text: String): String {
-        val actualText = text.bgRgb(51, 51, 51)
-        val actualLength = ansiEscapeRegex.replace(actualText, "").length
-
-        val leftPadding = (terminal.width - actualLength) / 2 + if (actualLength % 2 == 0) 0 else 1
-        val rightPadding = terminal.width - actualLength - leftPadding
-
-        return " ".repeat(leftPadding) + actualText + " ".repeat(rightPadding)
     }
 
     private fun handleInput() {
@@ -102,6 +108,47 @@ internal class TerminalService : ITerminalService {
 
         buffer.clear()
         subscribers.forEach { it(key) }
+    }
+
+    private fun calculateDifference(lines: List<String>): Map<Int, String?> {
+        val top = (terminal.height - lines.size) / 2
+
+        val newScreen = lines
+            .mapIndexed { index, s -> top + index to s }
+            .filter { (_, text) -> text.isNotBlank() }
+            .toMap()
+
+        val difference = mutableMapOf<Int, String?>()
+
+        val redrawLines = (newScreen.keys - currentScreen.keys) +
+                newScreen.keys.intersect(currentScreen.keys).filter { newScreen[it] != currentScreen[it] }
+        val clearLines = currentScreen.keys - newScreen.keys
+
+        difference.putAll(redrawLines.map { it to newScreen[it] })
+        difference.putAll(clearLines.map { it to null })
+
+        currentScreen = newScreen
+
+        return difference
+    }
+
+    private fun redraw(difference: Map<Int, String?>) {
+        difference.forEach { (index, text) ->
+            print(
+                Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.toLine(index + 1) +
+                        Ansi.ESCAPE_SEQUENCE + Ansi.Erase.LINE +
+                        finalize(text ?: "")
+            )
+        }
+    }
+
+    private fun finalize(text: String): String {
+        val actualLength = ansiEscapeRegex.replace(text, "").length
+
+        val leftPadding = (terminal.width - actualLength) / 2
+        val rightPadding = terminal.width - actualLength - leftPadding
+
+        return (" ".repeat(leftPadding) + text + " ".repeat(rightPadding)).bgRgb(85, 85, 85)
     }
 
 }

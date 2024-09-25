@@ -4,9 +4,19 @@ internal object Ansi {
 
     const val ESCAPE_SEQUENCE = "\u001b["
 
-    object Escape {
+    object Cursor {
 
-        const val ERASE_SCREEN = "2J"
+        const val INVISIBLE = "?25l"
+        const val VISIBLE = "?25h"
+
+        fun toLine(line: Int) = "${line};1H"
+
+    }
+
+    object Erase {
+
+        const val SCREEN = "2J"
+        const val LINE = "2K"
 
     }
 

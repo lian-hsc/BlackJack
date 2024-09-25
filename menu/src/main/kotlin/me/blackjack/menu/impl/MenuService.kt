@@ -58,16 +58,10 @@ internal class MenuService(private val terminalService: TerminalService) : IMenu
 
     private fun redraw(message: String?) {
         val state = currentMenu?.getState() ?: emptyList()
-        val inputs = currentMenu?.getInputs() ?: emptyMap()
 
         val lines = mutableListOf<String>()
 
         lines.addAll(state)
-
-        if (inputs.isNotEmpty()) {
-            lines.add("")
-            inputs.forEach { (key, value) -> lines.add("${key.rgb(255, 170, 0)}: $value") }
-        }
 
         if (message != null) {
             lines.add("")
