@@ -18,17 +18,18 @@ internal class StoredRuleService {
         reference: KProperty0<Rule<Type>>,
         default: Type,
     ): StoredRule<Type> =
-        StoredRule(
-            reference.javaField!!.declaringClass.simpleName +
-                    reference.name.replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase()
-                        else it.toString()
-                    },
-            reference.get(),
-            serializer(reference.returnType.arguments.first().type!!) as KSerializer<Type>,
-            this[reference.name],
-            default,
-        )
+        (reference.javaField!!.declaringClass.simpleName + reference.name.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase()
+            else it.toString()
+        }).let {
+            StoredRule(
+                it,
+                reference.get(),
+                serializer(reference.returnType.arguments.first().type!!) as KSerializer<Type>,
+                this[it],
+                default,
+            )
+        }
 
     fun initLookupMap(values: Map<String, JsonElement>) = with(values) {
         lookupMap = listOf(
@@ -74,6 +75,6 @@ internal class StoredRuleService {
         return lookupMap[base] as StoredRule<Type>
     }
 
-    fun all() = lookupMap.values.associate { it.name to it.value }
+    fun saveable() = lookupMap.values.associate { it.name to it.json }
 
 }

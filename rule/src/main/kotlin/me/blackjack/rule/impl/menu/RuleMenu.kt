@@ -1,8 +1,6 @@
 package me.blackjack.rule.impl.menu
 
-import me.blackjack.menu.InputReaction
-import me.blackjack.menu.Pop
-import me.blackjack.menu.Redraw
+import me.blackjack.menu.*
 import me.blackjack.rule.Rule
 import me.blackjack.rule.impl.RuleService
 import me.blackjack.rule.impl.stored.StoredRuleService
@@ -13,10 +11,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import me.blackjack.rule.menu.RuleMenu as IRuleMenu
 
 @Single
-internal class RuleMenu(
-    val ruleService: RuleService,
-    val storedRuleService: StoredRuleService,
-) : IRuleMenu {
+internal class RuleMenu(private val ruleService: RuleService) : IRuleMenu {
 
     private var currentSubmenu: Submenu? = null
 
@@ -31,10 +26,7 @@ internal class RuleMenu(
 
     override fun getState(): List<String> =
         if (currentSubmenu == null) {
-            Submenu.entries.map {
-                if (it == selectedSubmenu) it.title.rgb(255, 255, 85)
-                else it.title
-            }
+            Submenu.entries.map { it.title.highlightIf(it == selectedSubmenu) }
         } else {
             currentSubmenu!!.rules.map {
                 val selected = it == selectedRule
@@ -42,13 +34,8 @@ internal class RuleMenu(
 
                 val displayName = Constants.names[it]!!
                 val valueDisplay = AllowedValues.getAllowedValues(it)[value]!!
-                val display = "$displayName " +
-                        (if (selected) " < " else "") +
-                        valueDisplay +
-                        (if (selected) " > " else "")
 
-                if (selected) display.rgb(255, 255, 85)
-                else display
+                "$displayName ${valueDisplay.selectorIf(selected)}".highlightIf(selected)
             }
         }
 
@@ -56,19 +43,13 @@ internal class RuleMenu(
         when (input) {
             is ArrowKey -> {
                 when (input.direction) {
-                    ArrowKey.Direction.UP -> {
-                        selectedSubmenu = selectedSubmenu
-                            ?.let { it.ordinal - 1 }
-                            ?.let { Submenu.entries.getOrNull(it) }
-                            ?: Submenu.entries.last()
-                        Redraw
-                    }
-
-                    ArrowKey.Direction.DOWN -> {
-                        selectedSubmenu = selectedSubmenu
-                            ?.let { it.ordinal + 1 }
-                            ?.let { Submenu.entries.getOrNull(it) }
-                            ?: Submenu.entries.first()
+                    ArrowKey.Direction.UP, ArrowKey.Direction.DOWN -> {
+                        selectedSubmenu = Submenu.entries[(
+                                selectedSubmenu
+                                    ?.ordinal
+                                    ?.let { if (input.direction == ArrowKey.Direction.UP) it - 1 else it + 1 }
+                                    ?: 0)
+                                % Submenu.entries.size]
                         Redraw
                     }
 
@@ -90,39 +71,27 @@ internal class RuleMenu(
         when (input) {
             is ArrowKey -> {
                 when(input.direction) {
-                    ArrowKey.Direction.UP -> {
-                        selectedRule = selectedRule
-                            ?.let { currentSubmenu!!.rules.indexOf(it) - 1 }
-                            ?.let { currentSubmenu!!.rules.getOrNull(it) }
-                            ?: currentSubmenu!!.rules.last()
+                    ArrowKey.Direction.UP, ArrowKey.Direction.DOWN -> {
+                        selectedRule = currentSubmenu!!.rules[(
+                                currentSubmenu!!
+                                    .rules
+                                    .indexOf(selectedRule) +
+                                        if (input.direction == ArrowKey.Direction.UP) -1 else 1)
+                                % currentSubmenu!!.rules.size]
                         Redraw
                     }
 
-                    ArrowKey.Direction.DOWN -> {
-                        selectedRule = selectedRule
-                            ?.let { currentSubmenu!!.rules.indexOf(it) + 1 }
-                            ?.let { currentSubmenu!!.rules.getOrNull(it) }
-                            ?: currentSubmenu!!.rules.first()
-                        Redraw
-                    }
-
-                    ArrowKey.Direction.LEFT -> {
-                        val value = ruleService.getValue(selectedRule!!)
+                    ArrowKey.Direction.LEFT, ArrowKey.Direction.RIGHT -> {
                         val allowedValues = AllowedValues.getAllowedValues(selectedRule!!)
-                        val index = allowedValues.keys.indexOf(value)
-                        val newValue = allowedValues.keys.toList().getOrNull(index - 1) ?: allowedValues.keys.last()
 
-                        ruleService.setAnyValue(selectedRule!!, newValue)
-                        Redraw
-                    }
-
-                    ArrowKey.Direction.RIGHT -> {
-                        val value = ruleService.getValue(selectedRule!!)
-                        val allowedValues = AllowedValues.getAllowedValues(selectedRule!!)
-                        val index = allowedValues.keys.indexOf(value)
-                        val newValue = allowedValues.keys.toList().getOrNull(index + 1) ?: allowedValues.keys.first()
-
-                        ruleService.setAnyValue(selectedRule!!, newValue)
+                        ruleService.setAnyValue(selectedRule!!,
+                            allowedValues.keys.toList()[(
+                                    allowedValues
+                                        .keys
+                                        .indexOf(ruleService.getValue(selectedRule!!)) +
+                                            if (input.direction == ArrowKey.Direction.LEFT) -1 else 1)
+                                    % allowedValues.keys.size]
+                        )
                         Redraw
                     }
                 }

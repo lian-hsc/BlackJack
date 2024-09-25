@@ -43,7 +43,7 @@ internal class RuleService(
     }
 
     override fun saveRules() {
-        Json.encodeToStream(storedRuleService.all(), rulesFiles.outputStream())
+        Json.encodeToStream(storedRuleService.saveable(), rulesFiles.outputStream())
     }
 
 }
