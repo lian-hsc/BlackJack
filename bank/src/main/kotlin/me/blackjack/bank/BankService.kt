@@ -10,7 +10,8 @@ interface BankService {
 
     fun reserve(amount: Long)
     fun free(amount: Long)
-    fun collect(amount: Long)
+    fun remove(amount: Long)
+    fun add(amount: Long)
 
     fun save()
 

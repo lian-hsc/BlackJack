@@ -33,6 +33,10 @@ internal class MenuService(private val terminalService: TerminalService) : IMenu
         }
     }
 
+    override fun redraw() {
+        redraw(null)
+    }
+
     override fun push(menu: Menu, pushType: MenuService.PushType) = synchronized(_stack) {
         if (pushType == MenuService.PushType.REPLACE) _stack.removeLast()
 

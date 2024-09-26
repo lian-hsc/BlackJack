@@ -54,12 +54,16 @@ internal class BankService : IBankService {
         reservedCapital -= amount
     }
 
-    override fun collect(amount: Long) {
+    override fun remove(amount: Long) {
         if (amount > capital) {
             throw IllegalStateException("Not enough capital to collect $amount")
         }
 
         capital -= amount
+    }
+
+    override fun add(amount: Long) {
+        capital += amount
     }
 
     fun getLoan(amount: Long) {

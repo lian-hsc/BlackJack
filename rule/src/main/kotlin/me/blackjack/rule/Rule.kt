@@ -46,28 +46,28 @@ class Rule<Type> private constructor() {
 
     object Insurance {
         val enabled = Rule<Boolean>()
-        val payout = Rule<Double>()
+        val payout = Rule<Double?>()
     }
 
     object BustSideBet {
         val enabled = Rule<Boolean>()
-        val payout = Rule<Double>()
+        val payout = Rule<Double?>()
     }
 
     object LuckyLuckySideBet {
         val enabled = Rule<Boolean>()
 
-        val payout19 = Rule<Double>()
-        val payout20 = Rule<Double>()
-        val payout21 = Rule<Double>()
+        val payout19 = Rule<Double?>()
+        val payout20 = Rule<Double?>()
+        val payout21 = Rule<Double?>()
 
-        val payout21Match = Rule<Double>()
+        val payout21Match = Rule<Double?>()
 
-        val payoutSequence = Rule<Double>()
-        val payoutTripple = Rule<Double>()
+        val payoutSequence = Rule<Double?>()
+        val payoutTripple = Rule<Double?>()
 
-        val payoutSequenceMatch = Rule<Double>()
-        val payoutTrippleMatch = Rule<Double>()
+        val payoutSequenceMatch = Rule<Double?>()
+        val payoutTrippleMatch = Rule<Double?>()
     }
 
 }
