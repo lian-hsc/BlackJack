@@ -7,3 +7,5 @@ fun Any.selectorIf(condition: Boolean, highlight: Boolean = true) =
     else this.toString()
 
 fun Any.highlightIf(condition: Boolean) = if (condition) this.toString().rgb(255, 255, 85) else this.toString()
+
+fun Any.highlight() = this.toString().rgb(255, 255, 85)

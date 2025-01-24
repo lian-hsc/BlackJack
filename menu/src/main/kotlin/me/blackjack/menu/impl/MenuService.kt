@@ -3,11 +3,8 @@ package me.blackjack.menu.impl
 import me.blackjack.menu.*
 import me.blackjack.menu.MenuService
 import me.blackjack.terminal.TerminalService
-import me.blackjack.terminal.bgRgb
-import me.blackjack.terminal.rgb
 import org.koin.core.annotation.Single
 import java.util.Collections
-import kotlin.concurrent.thread
 import me.blackjack.menu.MenuService as IMenuService
 
 @Single

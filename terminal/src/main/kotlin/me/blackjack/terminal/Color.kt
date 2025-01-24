@@ -8,5 +8,8 @@ fun String.rgb(r: Int, g: Int, b: Int) =
 fun String.rgb(hex: String) =
     "${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.foreground(hex)}$this${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.RESET_FOREGROUND}"
 
-fun String.bgRgb(r: Int, g: Int, b: Int) =
+fun String.bg(r: Int, g: Int, b: Int) =
     "${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.background(r, g, b)}$this${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.RESET_BACKGROUND}"
+
+fun String.bg(hex: String) =
+    "${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.background(hex)}$this${Ansi.ESCAPE_SEQUENCE}${Ansi.Color.RESET_BACKGROUND}"

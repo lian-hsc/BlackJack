@@ -37,11 +37,16 @@ internal object Ansi {
         fun foreground(hex: String) = foreground(
             hex.substring(0, 2).toInt(16),
             hex.substring(2, 4).toInt(16),
-            hex.substring(4, 6).toInt(16)
+            hex.substring(4, 6).toInt(16),
         )
         const val RESET_FOREGROUND = "39m"
 
         fun background(r: Int, g: Int, b: Int) = "48;2;${r};${g};${b}m"
+        fun background(hex: String) = Color.background(
+            hex.substring(0, 2).toInt(16),
+            hex.substring(2, 4).toInt(16),
+            hex.substring(4, 6).toInt(16),
+        )
         const val RESET_BACKGROUND = "49m"
 
     }

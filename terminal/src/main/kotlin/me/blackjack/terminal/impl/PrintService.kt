@@ -1,6 +1,6 @@
 package me.blackjack.terminal.impl
 
-import me.blackjack.terminal.bgRgb
+import me.blackjack.terminal.bg
 import me.blackjack.terminal.impl.constant.Ansi
 import org.koin.core.annotation.Single
 
@@ -99,7 +99,7 @@ internal class PrintService(private val jline: JLineService) {
         val rightPads = pads / 2
         val leftPads = pads - rightPads
 
-        return (" ".repeat(leftPads) + text + " ".repeat(rightPads)).bgRgb(85, 85, 85)
+        return (" ".repeat(leftPads) + text + " ".repeat(rightPads).bg(85, 85, 85)).bg(85, 85, 85)
     }
 
 }
