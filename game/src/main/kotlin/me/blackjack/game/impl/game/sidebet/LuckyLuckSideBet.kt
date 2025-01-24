@@ -51,8 +51,7 @@ internal class LuckyLuckSideBet(
             }
         } else 0.0
 
-    private val cards
-        get() = game.playerHands.first().take(2) + game.dealerHand.first()
+    private lateinit var cards: List<Card>
 
     private val value
         get() = cards.value
@@ -67,6 +66,10 @@ internal class LuckyLuckSideBet(
         get() = cards
             .map { it.rank }
             .containsAll(sequenceList)
+
+    override fun startGame() {
+        cards = game.playerHands.first().take(2) + game.dealerHand.first()
+    }
 
     companion object {
 

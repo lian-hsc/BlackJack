@@ -7,6 +7,8 @@ internal sealed interface SideBet {
     val state: State
     val payout: Double
 
+    fun startGame() {}
+
     enum class State {
 
         PENDING,

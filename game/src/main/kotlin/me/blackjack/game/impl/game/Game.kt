@@ -3,6 +3,7 @@ package me.blackjack.game.impl.game
 import me.blackjack.bank.BankService
 import me.blackjack.game.impl.game.sidebet.BustSideBet
 import me.blackjack.game.impl.game.sidebet.InsuranceSideBet
+import me.blackjack.game.impl.game.sidebet.LuckyLuckSideBet
 import me.blackjack.game.impl.game.sidebet.SideBet
 import me.blackjack.game.impl.model.Deck
 import me.blackjack.game.impl.model.value
@@ -68,6 +69,8 @@ internal class Game(
             }
 
             state = if (playerHands.first().isBlackjack) State.DEALER else State.PLAYER
+
+            sideBets.forEach { it.startGame() }
             false
         }
         
