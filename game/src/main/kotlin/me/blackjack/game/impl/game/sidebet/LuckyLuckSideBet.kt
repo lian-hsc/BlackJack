@@ -51,9 +51,9 @@ internal class LuckyLuckSideBet(
             }
         } else 0.0
 
-    private lateinit var cards: List<Card>
+    lateinit var cards: List<Card>
 
-    private val value
+    val value
         get() = cards.value
 
     private val matches
