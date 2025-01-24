@@ -38,7 +38,14 @@ internal class MenuService(private val terminalService: TerminalService) : IMenu
     }
 
     override fun push(menu: Menu, pushType: MenuService.PushType) = synchronized(_stack) {
-        if (pushType == MenuService.PushType.REPLACE) _stack.removeLast()
+        if (pushType == MenuService.PushType.REPLACE && currentMenu != null) {
+            val error = currentMenu!!.onPop()
+            if (error == null) _stack.removeLast()
+            else {
+                redraw(error)
+                return
+            }
+        }
 
         _stack.add(menu)
         menu.onPush()
