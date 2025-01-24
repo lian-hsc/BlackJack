@@ -15,12 +15,12 @@ internal class Game(
     private val bankService: BankService,
     private val ruleService: RuleService,
     previousBet: Long,
-) : GameHands(deck, bankService, ruleService, previousBet) {
+) : GameHands(deck, bankService, ruleService) {
 
     var state: State = State.PREPARE
         private set
 
-    var bet = previousBet
+    override var bet = previousBet
         private set
 
     val sideBets = mutableListOf<SideBet>()
