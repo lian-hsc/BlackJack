@@ -5,6 +5,7 @@ import me.blackjack.game.impl.game.sidebet.BustSideBet
 import me.blackjack.game.impl.game.sidebet.InsuranceSideBet
 import me.blackjack.game.impl.game.sidebet.LuckyLuckSideBet
 import me.blackjack.game.impl.game.sidebet.SideBet
+import me.blackjack.game.impl.model.Card
 import me.blackjack.game.impl.model.Deck
 import me.blackjack.game.impl.model.value
 import me.blackjack.rule.Rule
@@ -76,7 +77,8 @@ internal class Game(
         
         is Insure -> {
             assert(state == State.PLAYER && playerHands.size == 1 && currentHand.isUnplayed()
-                    && sideBets.none { it is InsuranceSideBet })
+                    && sideBets.none { it is InsuranceSideBet }
+                    && (dealerHand.first().rank == Card.CardRank.ACE || dealerHand.first().rank.value == 10))
 
             bankService.reserve(input.bet)
             sideBets.add(InsuranceSideBet(this, input.bet, ruleService))
@@ -246,7 +248,8 @@ internal class Game(
                 actions.add(Stand::class)
             }
 
-            if (playerHands.size == 1 && currentHand.isUnplayed() && sideBets.none { it is InsuranceSideBet })
+            if (playerHands.size == 1 && currentHand.isUnplayed() && sideBets.none { it is InsuranceSideBet }
+                && (dealerHand.first().rank == Card.CardRank.ACE || dealerHand.first().rank.value == 10))
                 actions.add(Insure::class)
             
             if (currentHand.canDouble()) actions.add(Double::class)
