@@ -75,7 +75,8 @@ internal class Game(
         }
         
         is Insure -> {
-            assert(state == State.PLAYER && playerHands.size == 1 && currentHand.isUnplayed())
+            assert(state == State.PLAYER && playerHands.size == 1 && currentHand.isUnplayed()
+                    && sideBets.none { it is InsuranceSideBet })
 
             bankService.reserve(input.bet)
             sideBets.add(InsuranceSideBet(this, input.bet, ruleService))
@@ -245,7 +246,7 @@ internal class Game(
                 actions.add(Stand::class)
             }
 
-            if (playerHands.size == 1 && currentHand.isUnplayed())
+            if (playerHands.size == 1 && currentHand.isUnplayed() && sideBets.none { it is InsuranceSideBet })
                 actions.add(Insure::class)
             
             if (currentHand.canDouble()) actions.add(Double::class)
