@@ -16,8 +16,7 @@ internal class SideBetMenu(val game: GameCollection) : Menu {
     private var sideBet: Long = 1
 
     override fun onPush() {
-        index = 0
-        selector = 0
+        index = 2
     }
 
     override fun getState(): List<String> = listOf(
