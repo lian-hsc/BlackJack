@@ -36,6 +36,8 @@ internal class PrintService(private val jline: JLineService) {
     }
 
     fun printBye() {
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Color.SET_DEFAULT_FOREGROUND)
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Color.SET_DEFAULT_BACKGROUND)
         print(Ansi.ESCAPE_SEQUENCE + Ansi.Erase.SCREEN)
         print(Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.toLine(1))
 
@@ -44,6 +46,8 @@ internal class PrintService(private val jline: JLineService) {
         println(finalize(""))
 
         print(Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.VISIBLE)
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Color.SET_DEFAULT_FOREGROUND)
+        print(Ansi.ESCAPE_SEQUENCE + Ansi.Color.SET_DEFAULT_BACKGROUND)
     }
 
     private fun calculateDifference(lines: List<String>): Map<Int, String?> {
@@ -99,7 +103,9 @@ internal class PrintService(private val jline: JLineService) {
         val rightPads = pads / 2
         val leftPads = pads - rightPads
 
-        return (" ".repeat(leftPads) + text + " ".repeat(rightPads).bg(85, 85, 85)).bg(85, 85, 85)
+        return (Ansi.ESCAPE_SEQUENCE + Ansi.Color.RESET_FOREGROUND +
+                Ansi.ESCAPE_SEQUENCE + Ansi.Color.RESET_BACKGROUND +
+                " ".repeat(leftPads) + text + " ".repeat(rightPads))
     }
 
 }

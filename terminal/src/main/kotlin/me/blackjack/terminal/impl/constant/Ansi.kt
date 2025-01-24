@@ -39,7 +39,8 @@ internal object Ansi {
             hex.substring(2, 4).toInt(16),
             hex.substring(4, 6).toInt(16),
         )
-        const val RESET_FOREGROUND = "39m"
+        const val RESET_FOREGROUND = "38;2;255;255;255m"
+        const val SET_DEFAULT_FOREGROUND = "39m"
 
         fun background(r: Int, g: Int, b: Int) = "48;2;${r};${g};${b}m"
         fun background(hex: String) = Color.background(
@@ -47,7 +48,8 @@ internal object Ansi {
             hex.substring(2, 4).toInt(16),
             hex.substring(4, 6).toInt(16),
         )
-        const val RESET_BACKGROUND = "49m"
+        const val RESET_BACKGROUND = "48;2;85;85;85m"
+        const val SET_DEFAULT_BACKGROUND = "49m"
 
     }
 
