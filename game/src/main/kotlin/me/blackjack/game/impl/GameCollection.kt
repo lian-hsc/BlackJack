@@ -7,35 +7,55 @@ import me.blackjack.game.impl.model.Deck
 import me.blackjack.rule.Rule
 import me.blackjack.rule.RuleService
 import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Single
+import kotlin.math.min
 import kotlin.reflect.KClass
+import me.blackjack.game.GameCollection as IGameCollection
 
 
-@Factory
+@Single
 internal class GameCollection(
     private val bankService: BankService,
     private val ruleService: RuleService,
-) {
+) : IGameCollection {
 
-    private val deck = Deck(ruleService.getValue(Rule.General.decks), ruleService.getValue(Rule.General.shufflePercentage))
+    private var deck = Deck(ruleService.getValue(Rule.General.decks), ruleService.getValue(Rule.General.shufflePercentage))
 
-    private var currentGame: Game = createGame()
-    private var previousBet: Long = listOf(500, bankService.availableCapital).min()
+    private var currentGame: Game? = null
+
+    private var previousBet: Long = min(500, bankService.availableCapital)
+
+    val state get() = currentGame?.state ?: Game.State.UNINITIALIZED
+    val bet get() = currentGame?.bet ?: error("No game in progress")
+    val sideBets get() = currentGame?.sideBets ?: error("No game in progress")
+    val playerHands get() = currentGame?.playerHands ?: error("No game in progress")
+    val currentPlayerHand get() = currentGame?.currentHandIndex ?: error("No game in progress")
+    val dealerHand get() = currentGame?.dealerHand ?: error("No game in progress")
 
     init {
         deck.shuffle()
     }
 
-    fun input(input: PlayerInput): GameReaction {
-        if (input is SetBet) previousBet = input.bet
-
-        val reaction = currentGame.input(input)
-
-        if (reaction == GameDone) currentGame = createGame()
-
-        return reaction
+    override fun reset() {
+        currentGame = null
+        previousBet = min(500, bankService.availableCapital)
+        deck = Deck(ruleService.getValue(Rule.General.decks), ruleService.getValue(Rule.General.shufflePercentage))
+        deck.shuffle()
     }
 
-    fun getPossibleActions(): List<KClass<out PlayerInput>> = currentGame.getPossibleActions()
+    fun input(input: PlayerInput) {
+        if (currentGame == null) {
+            if (input != Initiate) throw IllegalStateException("First input must be Initiate")
+            currentGame = createGame()
+            return
+        }
+
+        if (input is SetBet) previousBet = input.bet
+        if (currentGame!!.input(input)) currentGame = null
+    }
+
+    fun getPossibleActions(): List<KClass<out PlayerInput>> =
+        currentGame?.getPossibleActions() ?: listOf(Initiate::class)
 
 
     private fun createGame() = Game(deck, bankService, ruleService, previousBet)

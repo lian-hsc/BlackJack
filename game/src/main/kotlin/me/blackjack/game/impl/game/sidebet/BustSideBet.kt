@@ -12,7 +12,7 @@ internal class BustSideBet(
 
     override val state: SideBet.State
         get() =
-            if (game.state == Game.Sate.FINISHED) {
+            if (game.state == Game.State.FINISHED) {
                 if (game.dealerHand.isBust) SideBet.State.WON
                 else SideBet.State.LOST
             } else SideBet.State.PENDING

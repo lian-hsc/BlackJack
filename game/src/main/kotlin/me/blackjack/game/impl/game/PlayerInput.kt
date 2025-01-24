@@ -2,6 +2,8 @@ package me.blackjack.game.impl.game
 
 sealed interface PlayerInput
 
+data object Initiate : PlayerInput
+
 data class PregameSideBet(val type: Type, val bet: Long) : PlayerInput {
 
     enum class Type {
@@ -32,7 +34,7 @@ data object SurrenderCurrent : PlayerInput
 
 data object Proceed : PlayerInput
 
-data class Surrender(val hands: List<Int>) : PlayerInput
+data class Surrender(val hand: Int) : PlayerInput
 
 data object FinishGame : PlayerInput
 

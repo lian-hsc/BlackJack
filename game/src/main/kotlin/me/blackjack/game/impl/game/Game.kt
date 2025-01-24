@@ -17,17 +17,21 @@ internal class Game(
     previousBet: Long,
 ) : GameHands(deck, bankService, ruleService, previousBet) {
 
-    var state: Sate = Sate.PREPARE
+    var state: State = State.PREPARE
         private set
 
     var bet = previousBet
         private set
 
     val sideBets = mutableListOf<SideBet>()
+
+    val payouts = mutableListOf<Payout>()
     
-    fun input(input: PlayerInput): GameReaction = when (input) {
+    fun input(input: PlayerInput): Boolean = when (input) {
+        is Initiate -> throw IllegalStateException("Initiate must be first input")
+
         is PregameSideBet -> {
-            assert(state == Sate.PREPARE)
+            assert(state == State.PREPARE)
 
             bankService.reserve(input.bet)
 
@@ -36,18 +40,18 @@ internal class Game(
                 PregameSideBet.Type.LUCKY_LUCKY -> sideBets.add(BustSideBet(this, input.bet, ruleService))
             }
 
-            AwaitInput
+            false
         }
 
         is SetBet -> {
-            assert(state == Sate.PREPARE)
+            assert(state == State.PREPARE)
 
             bet = input.bet
-            AwaitInput
+            false
         }
 
-        Start -> run {
-            assert(state == Sate.PREPARE)
+        Start -> {
+            assert(state == State.PREPARE)
 
             bankService.reserve(bet)
             
@@ -59,97 +63,84 @@ internal class Game(
                 dealerHand.hit()
 
                 if (dealerHand.isBlackjack && ruleService.getValue(Rule.Dealer.checksBlackjack)) {
-                    state = Sate.FINISHED
-                    return@run EndGame.Reason.DEALER_PEEKED_BLACKJACK()
+                    state = State.FINISHED
                 }
             }
             
-            state = Sate.PLAYER
-            AwaitInput
+            state = State.PLAYER
+            false
         }
         
         is Insure -> {
-            assert(state == Sate.PLAYER && playerHands.size == 1 && currentHand.isUnplayed())
+            assert(state == State.PLAYER && playerHands.size == 1 && currentHand.isUnplayed())
 
             bankService.reserve(input.bet)
             sideBets.add(InsuranceSideBet(this, input.bet, ruleService))
-            AwaitInput
+            false
         }
         
         Hit -> {
-            assert(state == Sate.PLAYER && currentHand.canHit())
+            assert(state == State.PLAYER && currentHand.canHit())
             
             currentHand.hit()
             
             if (!currentHand.canHit()) {
                 if (hasNextHand()) {
                     nextHand()
-                    AwaitInput
                 } else {
-                    state = Sate.DEALER
-                    StartDealer
+                    state = State.DEALER
                 }
-            } else AwaitInput
+            }
+
+            false
         }
         
         Stand -> {
-            assert(state == Sate.PLAYER && currentHand.canHit())
+            assert(state == State.PLAYER && currentHand.canHit())
             
-            if (hasNextHand()) {
-                nextHand()
-                AwaitInput
-            } else {
-                state = Sate.DEALER
-                StartDealer
-            }
+            if (hasNextHand()) nextHand()
+            else state = State.DEALER
+
+            false
         }
         
         Double -> {
-            assert(state == Sate.PLAYER && currentHand.canDouble())
+            assert(state == State.PLAYER && currentHand.canDouble())
             
             currentHand.double()
             
-            if (hasNextHand()) {
-                nextHand()
-                AwaitInput
-            } else {
-                state = Sate.DEALER
-                StartDealer
-            }
+            if (hasNextHand()) nextHand()
+            else state = State.DEALER
+
+            false
         }
         
         Split -> {
-            assert(state == Sate.PLAYER && currentHand.canSplit())
+            assert(state == State.PLAYER && currentHand.canSplit())
             
             currentHand.split()
             
             if (!currentHand.canHit()) {
-                if (hasNextHand()) {
-                    nextHand()
-                    AwaitInput
-                } else {
-                    state = Sate.DEALER
-                    StartDealer
-                }
-            } else AwaitInput
+                if (hasNextHand()) nextHand()
+                else state = State.DEALER
+            }
+
+            false
         }
         
         SurrenderCurrent -> {
-            assert(state == Sate.PLAYER && currentHand.canSurrender())
+            assert(state == State.PLAYER && currentHand.canSurrender())
             
             currentHand.surrender()
             
-            if (hasNextHand()) {
-                nextHand()
-                AwaitInput
-            } else {
-                state = Sate.DEALER
-                StartDealer
-            }
+            if (hasNextHand()) nextHand()
+            else state = State.DEALER
+
+            false
         }
         
         Proceed -> run {
-            assert(state == Sate.DEALER)
+            assert(state == State.DEALER)
             
             if (dealerSecondCardHidden) {
                 dealerSecondCardHidden = false
@@ -157,14 +148,14 @@ internal class Game(
                 if (dealerHand.size == 1) dealerHand.hit()
 
                 if (dealerHand.isBlackjack) {
-                    state = Sate.FINISHED
-                    return@run EndGame.Reason.DEALER_BLACKJACK()
+                    state = State.FINISHED
+                    return@run false
                 }
 
-                if (mustDealerHit()) return@run AwaitInput
+                if (mustDealerHit()) return@run false
                 else {
-                    state = Sate.FINISHED
-                    EndGame.Reason.DEALER_DONE()
+                    state = State.FINISHED
+                    return@run false
                 }
             }
 
@@ -177,30 +168,23 @@ internal class Game(
                             it.isTrippleSeven() ||
                             it.isFiveCard()
                 }) {
-                state = Sate.FINISHED
-                return@run EndGame.Reason.DEALER_NO_ACTION()
+                state = State.FINISHED
+                return@run false
             }
             
             dealerHand.hit()
             
-            if (dealerHand.isBlackjack) {
-                state = Sate.FINISHED
-                EndGame.Reason.DEALER_BLACKJACK()
-            } else if (dealerHand.isBust) {
-                state = Sate.FINISHED
-                EndGame.Reason.DEALER_BUST()
-            } else if (mustDealerHit()) {
-                AwaitInput
-            } else {
-                state = Sate.FINISHED
-                EndGame.Reason.DEALER_DONE()
-            }
+            if (dealerHand.isBlackjack) state = State.FINISHED
+            else if (dealerHand.isBust) state = State.FINISHED
+            else if (!mustDealerHit()) state = State.FINISHED
+
+            false
         }
         
         is Surrender -> {
-            assert(state == Sate.DEALER && input.hands.all { playerHands[it].canSurrender() })
-            
-            input.hands.forEach { playerHands[it].surrender() }
+            assert(state == State.DEALER && playerHands[input.hand].canSurrender() )
+
+            playerHands[input.hand].surrender()
 
             if (playerHands.all {
                     it.isBlackjack ||
@@ -209,34 +193,37 @@ internal class Game(
                             it.isTrippleSeven() ||
                             it.isFiveCard()
                 }) {
-                state = Sate.FINISHED
-                EndGame.Reason.DEALER_NO_ACTION()
-            } else AwaitInput
+                state = State.FINISHED
+            }
+
+            false
         }
 
         FinishGame -> {
-            assert(state == Sate.FINISHED)
+            assert(state == State.FINISHED)
             payoutHands()
             payoutSideBets()
-            GameDone
+            true
         }
 
         AbortGame -> {
             sideBets.forEach { bankService.free(it.bet) }
             playerHands.forEach { bankService.free(bet * if (it.doubled) 2 else 1) }
 
-            GameDone
+            true
         }
     }
     
     fun getPossibleActions(): List<KClass<out PlayerInput>> = when(state) {
-        Sate.PREPARE -> listOf(
+        State.UNINITIALIZED -> throw IllegalStateException("Game not initialized")
+
+        State.PREPARE -> listOf(
                 PregameSideBet::class,
                 SetBet::class,
                 Start::class,
             )
         
-        Sate.PLAYER -> {
+        State.PLAYER -> {
             val actions = mutableListOf<KClass<out PlayerInput>>()
             
             if (playerHands.size == 1 && currentHand.isUnplayed())
@@ -254,13 +241,13 @@ internal class Game(
             actions
         }
         
-        Sate.DEALER -> listOf(Proceed::class, Surrender::class)
+        State.DEALER -> listOf(Proceed::class, Surrender::class)
         
-        Sate.FINISHED -> listOf(FinishGame::class)
+        State.FINISHED -> listOf(FinishGame::class)
     }
 
     private fun payoutHands() {
-        playerHands.forEach {
+        playerHands.forEachIndexed { index, it ->
             val multipler = if (it.doubled) 2 else 1
             bankService.free(bet * multipler)
 
@@ -280,23 +267,36 @@ internal class Game(
             }
             else it.value.compareTo(dealerHand.value).toDouble()
 
-            bankService.add((bet * payout * multipler).toLong())
+            val amount = (bet * payout * multipler).toLong()
+
+            payouts.add(HandPayout(index, amount))
+            bankService.add(amount)
         }
     }
 
     private fun payoutSideBets() {
-        sideBets.forEach {
+        sideBets.forEachIndexed { index, it ->
             if (it.state == SideBet.State.PENDING) throw IllegalStateException("Side bet not resolved")
 
             bankService.free(it.bet)
 
-            if (it.state == SideBet.State.LOST) bankService.remove(it.bet)
-            else bankService.add((it.bet * it.payout).toLong())
+            val amount = if (it.state == SideBet.State.LOST) -it.bet
+            else (it.bet * it.payout).toLong()
+
+            payouts.add(SidebetPayout(index, amount))
+            bankService.add(amount)
         }
     }
 
-    enum class Sate {
+    interface Payout
 
+    data class HandPayout(val hand: Int, val amount: Long) : Payout
+
+    data class SidebetPayout(val bet: Int, val amount: Long): Payout
+
+    enum class State {
+
+        UNINITIALIZED,
         PREPARE,
         PLAYER,
         DEALER,

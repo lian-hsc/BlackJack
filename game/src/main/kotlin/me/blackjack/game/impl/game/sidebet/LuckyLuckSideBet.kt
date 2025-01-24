@@ -14,7 +14,7 @@ internal class LuckyLuckSideBet(
 
     override val state: SideBet.State
         get() =
-            if (game.state == Game.Sate.PREPARE) SideBet.State.PENDING
+            if (game.state == Game.State.PREPARE) SideBet.State.PENDING
             else if (value == 19 || value == 20 || value == 21) SideBet.State.WON
             else SideBet.State.LOST
 
