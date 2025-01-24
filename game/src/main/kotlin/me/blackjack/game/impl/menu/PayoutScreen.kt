@@ -26,6 +26,8 @@ internal class PayoutScreen(private val game: GameCollection) : Menu {
     }
 
     override fun getState(): List<String> = buildList {
+        add("Against dealer's hand: ${game.dealerHand}")
+
         val (maxLength, state) = asState(game.payouts.map {
             Pair(
                 when (it) {
@@ -58,7 +60,7 @@ internal class PayoutScreen(private val game: GameCollection) : Menu {
     private fun display(sideBet: SideBet) = buildString {
         append(
             when (sideBet) {
-                is LuckyLuckSideBet -> "Lucky Lucky side bet: ${sideBet.cards.joinToString(", ")} (${sideBet.value})"
+                is LuckyLuckSideBet -> "Lucky Lucky side bet: ${sideBet.cards.joinToString(" ")} (${sideBet.value})"
                 is BustSideBet -> "Bust side bet"
                 is InsuranceSideBet -> "Insurance"
             }
