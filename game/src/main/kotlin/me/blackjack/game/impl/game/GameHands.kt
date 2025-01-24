@@ -12,8 +12,9 @@ internal sealed class GameHands(
     private val deck: Deck,
     private val bankService: BankService,
     private val ruleService: RuleService,
-    private val bet: Long,
 ) {
+
+    abstract val bet: Long
 
     val dealerHand = Hand()
     val playerHands = mutableListOf(Hand())
@@ -28,7 +29,6 @@ internal sealed class GameHands(
 
     init {
         if (deck.shouldShuffle) throw IllegalStateException("Deck should be shuffled")
-        if (bankService.availableCapital < bet) throw IllegalStateException("Bank is empty")
     }
 
     protected fun mustDealerHit() =
@@ -62,7 +62,7 @@ internal sealed class GameHands(
 
     protected fun Hand.canSplit(): Boolean {
         if (size != 2) return false
-        if (get(0).rank != get(1).rank) return false
+        if (get(0).rank.value != get(1).rank.value) return false
 
         if (get(0).rank != Card.CardRank.ACE && ruleService.getValue(Rule.Split.amount)
                 ?.let { splits >= it } == true
