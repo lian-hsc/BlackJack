@@ -37,7 +37,7 @@ internal class Game(
 
             when (input.type) {
                 PregameSideBet.Type.BUST -> sideBets.add(BustSideBet(this, input.bet, ruleService))
-                PregameSideBet.Type.LUCKY_LUCKY -> sideBets.add(BustSideBet(this, input.bet, ruleService))
+                PregameSideBet.Type.LUCKY_LUCKY -> sideBets.add(LuckyLuckSideBet(this, input.bet, ruleService))
             }
 
             false
