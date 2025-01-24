@@ -97,6 +97,7 @@ internal sealed class GameHands(
     }
 
     protected fun Hand.canSurrender(): Boolean {
+        if (isBust || isBlackjack) return false
         if (splits > 0 && !ruleService.getValue(Rule.Surrender.afterSplit)) return false
         if (doubled && !ruleService.getValue(Rule.DoubleDown.rescue)) return false
         if (dealerSecondCardHidden && !ruleService.getValue(Rule.Surrender.early)) return false
