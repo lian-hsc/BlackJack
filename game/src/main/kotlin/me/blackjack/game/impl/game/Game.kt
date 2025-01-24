@@ -25,7 +25,7 @@ internal class Game(
 
     val sideBets = mutableListOf<SideBet>()
 
-    val payouts = mutableListOf<Payout>()
+    val payouts = mutableListOf<GamePayout>()
     
     fun input(input: PlayerInput): Boolean = when (input) {
         is Initiate -> throw IllegalStateException("Initiate must be first input")
@@ -66,8 +66,8 @@ internal class Game(
                     state = State.FINISHED
                 }
             }
-            
-            state = State.PLAYER
+
+            state = if (playerHands.first().isBlackjack) State.DEALER else State.PLAYER
             false
         }
         
@@ -199,16 +199,27 @@ internal class Game(
             false
         }
 
-        FinishGame -> {
-            assert(state == State.FINISHED)
+        Payout -> {
+            assert(state == State.FINISHED && payouts.isEmpty())
             payoutHands()
             payoutSideBets()
+            false
+        }
+
+        FinishGame -> {
+            assert(state == State.FINISHED && payouts.isNotEmpty())
             true
         }
 
         AbortGame -> {
-            sideBets.forEach { bankService.free(it.bet) }
-            playerHands.forEach { bankService.free(bet * if (it.doubled) 2 else 1) }
+            if (state == State.FINISHED) {
+                payoutHands()
+                payoutSideBets()
+            } else {
+                sideBets.forEach { bankService.free(it.bet) }
+                playerHands.forEach { bankService.free(bet * if (it.doubled) 2 else 1) }
+            }
+
 
             true
         }
@@ -225,14 +236,14 @@ internal class Game(
         
         State.PLAYER -> {
             val actions = mutableListOf<KClass<out PlayerInput>>()
-            
-            if (playerHands.size == 1 && currentHand.isUnplayed())
-                actions.add(Insure::class)
-            
+
             if (currentHand.canHit()) {
                 actions.add(Hit::class)
                 actions.add(Stand::class)
             }
+
+            if (playerHands.size == 1 && currentHand.isUnplayed())
+                actions.add(Insure::class)
             
             if (currentHand.canDouble()) actions.add(Double::class)
             if (currentHand.canSplit()) actions.add(Split::class)
@@ -241,9 +252,15 @@ internal class Game(
             actions
         }
         
-        State.DEALER -> listOf(Proceed::class, Surrender::class)
+        State.DEALER -> buildList {
+            add(Proceed::class)
+            if (playerHands.any { it.canSurrender() }) add(Surrender::class)
+        }
         
-        State.FINISHED -> listOf(FinishGame::class)
+        State.FINISHED -> buildList {
+            if (payouts.isEmpty()) add(Payout::class)
+            else add(FinishGame::class)
+        }
     }
 
     private fun payoutHands() {
@@ -288,11 +305,15 @@ internal class Game(
         }
     }
 
-    interface Payout
+    sealed interface GamePayout {
 
-    data class HandPayout(val hand: Int, val amount: Long) : Payout
+        val amount: Long
 
-    data class SidebetPayout(val bet: Int, val amount: Long): Payout
+    }
+
+    data class HandPayout(val hand: Int, override val amount: Long) : GamePayout
+
+    data class SidebetPayout(val bet: Int, override val amount: Long): GamePayout
 
     enum class State {
 

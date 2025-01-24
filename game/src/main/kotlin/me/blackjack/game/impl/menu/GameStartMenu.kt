@@ -4,8 +4,8 @@ import me.blackjack.game.impl.GameCollection
 import me.blackjack.game.impl.game.Game
 import me.blackjack.game.impl.game.Initiate
 import me.blackjack.menu.*
-import me.blackjack.terminal.BackspaceKey
 import me.blackjack.terminal.EnterKey
+import me.blackjack.terminal.EscapeKey
 import me.blackjack.terminal.Key
 import org.koin.core.annotation.Single
 import me.blackjack.game.GameMenu as IGameMenu
@@ -34,7 +34,7 @@ internal class GameStartMenu(
             Push(betMenu, MenuService.PushType.REPLACE)
         }
 
-        is BackspaceKey -> Pop()
+        is EscapeKey -> Pop()
         else -> null
     }
 

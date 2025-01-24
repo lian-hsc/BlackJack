@@ -36,6 +36,8 @@ data object Proceed : PlayerInput
 
 data class Surrender(val hand: Int) : PlayerInput
 
+data object Payout : PlayerInput
+
 data object FinishGame : PlayerInput
 
 data object AbortGame : PlayerInput

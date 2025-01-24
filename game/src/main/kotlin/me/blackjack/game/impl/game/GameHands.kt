@@ -106,6 +106,8 @@ internal sealed class GameHands(
         return true
     }
 
+    fun canHandSurrender(hand: Hand) = hand.canSurrender()
+
     protected fun Hand.split() {
         if (!canSplit()) throw IllegalStateException("Cannot split hand")
 

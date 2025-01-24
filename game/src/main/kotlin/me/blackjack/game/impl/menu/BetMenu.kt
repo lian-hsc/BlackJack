@@ -2,7 +2,6 @@ package me.blackjack.game.impl.menu
 
 import me.blackjack.bank.format
 import me.blackjack.game.impl.GameCollection
-import me.blackjack.game.impl.game.Game
 import me.blackjack.game.impl.game.SetBet
 import me.blackjack.game.impl.game.Start
 import me.blackjack.menu.*
@@ -13,6 +12,7 @@ import org.koin.core.annotation.Single
 internal class BetMenu(
     private val game: GameCollection,
     private val sideBetMenu: SideBetMenu,
+    private val gameMenu: GameMenu,
 ) : Menu {
 
     private var index: Int = 0
@@ -76,9 +76,7 @@ internal class BetMenu(
                 2 -> {
                     try {
                         game.input(Start)
-
-                        // TODO: Push actual game menu
-                        Redraw
+                        Push(gameMenu)
                     } catch (_: IllegalStateException) {
                         Message("You don't have enough money to bet ${game.bet.format()}".bg("FF5555"))
                     }

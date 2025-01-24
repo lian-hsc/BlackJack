@@ -1,7 +1,7 @@
 package me.blackjack.terminal.impl
 
-import me.blackjack.terminal.bg
 import me.blackjack.terminal.impl.constant.Ansi
+import me.blackjack.terminal.stripStyle
 import org.koin.core.annotation.Single
 
 @Single
@@ -10,8 +10,6 @@ internal class PrintService(private val jline: JLineService) {
     private var cachedHeight: Int = jline.terminal.height
     private var cachedWidth: Int = jline.terminal.width
     private var cachedScreen = emptyMap<Int, String>()
-
-    private val ansiEscapeRegex = Regex("\u001B\\[[;\\d]*m")
 
     init {
         print(Ansi.ESCAPE_SEQUENCE + Ansi.Cursor.INVISIBLE)
@@ -96,7 +94,7 @@ internal class PrintService(private val jline: JLineService) {
     }
 
     private fun finalize(text: String): String {
-        val actualLength = ansiEscapeRegex.replace(text, "").length
+        val actualLength = text.stripStyle().length
 
         val pads = jline.terminal.width - actualLength
 

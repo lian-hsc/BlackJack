@@ -4,9 +4,9 @@ import me.blackjack.bank.BankService
 import me.blackjack.game.impl.game.*
 import me.blackjack.game.impl.game.Game
 import me.blackjack.game.impl.model.Deck
+import me.blackjack.game.impl.model.Hand
 import me.blackjack.rule.Rule
 import me.blackjack.rule.RuleService
-import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Single
 import kotlin.math.min
 import kotlin.reflect.KClass
@@ -19,7 +19,8 @@ internal class GameCollection(
     private val ruleService: RuleService,
 ) : IGameCollection {
 
-    private var deck = Deck(ruleService.getValue(Rule.General.decks), ruleService.getValue(Rule.General.shufflePercentage))
+    private var deck =
+        Deck(ruleService.getValue(Rule.General.decks), ruleService.getValue(Rule.General.shufflePercentage))
 
     private var currentGame: Game? = null
 
@@ -31,6 +32,8 @@ internal class GameCollection(
     val playerHands get() = currentGame?.playerHands ?: error("No game in progress")
     val currentPlayerHand get() = currentGame?.currentHandIndex ?: error("No game in progress")
     val dealerHand get() = currentGame?.dealerHand ?: error("No game in progress")
+    val dealerSecondCardHidden get() = currentGame?.dealerSecondCardHidden ?: error("No game in progress")
+    val payouts get() = currentGame?.payouts ?: error("No game in progress")
 
     init {
         deck.shuffle()
@@ -51,13 +54,19 @@ internal class GameCollection(
         }
 
         if (input is SetBet) previousBet = input.bet
-        if (currentGame!!.input(input)) currentGame = null
+        if (currentGame!!.input(input)) {
+            currentGame = if (input == AbortGame) null else createGame()
+        }
     }
 
     fun getPossibleActions(): List<KClass<out PlayerInput>> =
         currentGame?.getPossibleActions() ?: listOf(Initiate::class)
 
+    fun canSurrender(hand: Hand) = currentGame!!.canHandSurrender(hand)
 
-    private fun createGame() = Game(deck, bankService, ruleService, previousBet)
+    private fun createGame(): Game {
+        if (deck.shouldShuffle) deck.shuffle()
+        return Game(deck, bankService, ruleService, previousBet)
+    }
 
 }

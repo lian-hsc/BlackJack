@@ -57,11 +57,12 @@ internal class MenuService(private val terminalService: TerminalService) : IMenu
 
             if (error == null) {
                 _stack.removeLast()
-                redraw(null)
             } else {
                 redraw(error)
             }
         }
+
+        redraw(null)
     }
 
     private fun redraw(message: String?) {
