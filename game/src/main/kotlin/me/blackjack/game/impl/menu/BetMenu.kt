@@ -18,7 +18,7 @@ internal class BetMenu(
     private var index: Int = 0
 
     override fun onPush() {
-        index = 0
+        index = 2
     }
 
     override fun getState(): List<String> = listOf(
