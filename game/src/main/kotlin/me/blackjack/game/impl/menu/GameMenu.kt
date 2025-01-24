@@ -17,6 +17,7 @@ internal class GameMenu(private val game: GameCollection, private val payoutScre
 
     override fun onPush() {
         assert(game.state == Game.State.PLAYER)
+        selector = 2
     }
 
     override fun getState(): List<String> = buildList {
