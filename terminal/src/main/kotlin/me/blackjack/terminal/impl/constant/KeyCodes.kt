@@ -16,6 +16,6 @@ internal object KeyCodes {
     val ARROW_LEFT_SEQUENCE = listOf(ESC, ARROW_DESIGNATOR, ARROW_LEFT)
 
     const val CARRIAGE_RETURN = 13
-    const val BACKSPACE = 127
+    const val BACKSPACE = 8
 
 }
