@@ -20,9 +20,9 @@ internal class InputService(private val jLine: JLineService) {
                 buffer.add(input)
 
                 if (input == KeyCodes.ESC) {
-                    Thread.sleep(1)
-
-                    if (buffered.ready()) buffer.add(buffered.read())
+                    if (runCatching { input = buffered.read() }.isSuccess) {
+                        buffer.add(input)
+                    }
                 }
 
                 handleInput()
@@ -38,10 +38,10 @@ internal class InputService(private val jLine: JLineService) {
         val key =
             if (buffer.size > 1) {
                 when (buffer) {
-                    KeyCodes.ARROW_UP_SEQUENCE -> ArrowKey(ArrowKey.Direction.UP)
-                    KeyCodes.ARROW_DOWN_SEQUENCE -> ArrowKey(ArrowKey.Direction.DOWN)
-                    KeyCodes.ARROW_RIGHT_SEQUENCE -> ArrowKey(ArrowKey.Direction.RIGHT)
-                    KeyCodes.ARROW_LEFT_SEQUENCE -> ArrowKey(ArrowKey.Direction.LEFT)
+                    in KeyCodes.ARROW_UP_SEQUENCE -> ArrowKey(ArrowKey.Direction.UP)
+                    in KeyCodes.ARROW_DOWN_SEQUENCE -> ArrowKey(ArrowKey.Direction.DOWN)
+                    in KeyCodes.ARROW_RIGHT_SEQUENCE -> ArrowKey(ArrowKey.Direction.RIGHT)
+                    in KeyCodes.ARROW_LEFT_SEQUENCE -> ArrowKey(ArrowKey.Direction.LEFT)
                     else -> null
                 }
             } else if (buffer.first() == KeyCodes.ESC) EscapeKey
